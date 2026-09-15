@@ -19,7 +19,7 @@
 | SDW-104 PolicyProjection 生成、签名和发布 | 站点合同已有，终端合同待对接 | `runtime_configuration_v1` 是 Site/Segment projection；终端 `PolicyProjection` 已在本目录冻结，尚未接入 Cloud 发布器 |
 | SDW-105 Cloud 节点健康和授权选路 | 站点路径能力已有，终端选路待实现 | 现有路径/Peer/Runtime 遥测可复用；终端主备节点租约尚未发布 |
 | SDW-106 Cloud 控制通道和配置回执 | Runtime 能力已有，终端接口待实现 | 现有 `/auth/v1/runtime/*` 可参考；不能直接复用为终端配置接口 |
-| SDW-107 终端设备注册和 Client Grant/Projection 接口 | 设备注册数据层已完成，HTTP/Grant/Projection 进行中 | 客户端侧：`contracts/client_control.md`、`contracts/client_control.schema.json`、`contracts/examples/client_*.json`；Cloud 侧已加入 `0038_terminal_client_control.sql`、`0039_terminal_client_registration_idempotency.sql` 和 `cloud-db::client_control` repository，并完成真实 MySQL migration 验证；尚未接入 Cloud HTTP 路由、Grant/Projection 发布器 |
+| SDW-107 终端设备注册和 Client Grant/Projection 接口 | 设备注册和 Grant 持久化数据层已完成，HTTP/签发/Projection 进行中 | 客户端侧：`contracts/client_control.md`、`contracts/client_control.schema.json`、`contracts/examples/client_*.json`；Cloud 侧已加入 `0038_terminal_client_control.sql`、`0039_terminal_client_registration_idempotency.sql`、`cloud-db::client_control` 的设备注册和 Grant 幂等写入路径，并完成真实 MySQL migration 验证；尚未接入 Cloud HTTP 路由、Grant 签发服务和 Projection 发布器 |
 
 现有 Cloud 身份单元测试基线：在 `/Users/hyc/Documents/candy/candy-cloud` 执行 `cargo test -p cloud-identity --lib`，9 个测试通过。
 
