@@ -1,0 +1,6 @@
+{
+  "api_version": 1,
+  "message_type": "receipt_response",
+  "request_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+  "payload": {"accepted": true, "state": "committed"}
+}

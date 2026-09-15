@@ -108,6 +108,26 @@ function checkEventSemantics(event) {
   assert(allowedStates[event.from.dimension].has(event.from.value), "status event from value is invalid");
   assert(allowedStates[event.to.dimension].has(event.to.value), "status event to value is invalid");
 }
+function checkClientControlSemantics(message) {
+  const payload = message.payload;
+  if (message.message_type === "register_device_response") {
+    assert(payload.grant.device_id === payload.device_id, "Client Grant device binding mismatch");
+    assert(payload.grant.device_key_id === payload.device_key_id, "Client Grant key binding mismatch");
+    assert(payload.grant.expires_at > payload.grant.issued_at, "Client Grant expiry must follow issue time");
+  }
+  if (message.message_type === "projection_response") {
+    assert(payload.projection.device_id === payload.device_id, "Projection response device binding mismatch");
+    assert(payload.projection.device_key_id === payload.device_key_id, "Projection response key binding mismatch");
+    assert(payload.projection.grant_id === payload.grant_id, "Projection response Grant binding mismatch");
+    checkProjectionSemantics(payload.projection, signatureVector);
+  }
+  if (message.message_type === "receipt_request") {
+    assert(payload.device_id === projection.device_id, "receipt device binding mismatch");
+    assert(payload.device_key_id === projection.device_key_id, "receipt key binding mismatch");
+    assert(payload.projection_id === projection.projection_id, "receipt projection binding mismatch");
+    assert(payload.content_hash === projection.content_hash, "receipt content hash mismatch");
+  }
+}
 
 const projection = readJson(path.join(examples, "policy_projection.json"));
 const status = readJson(path.join(examples, "agent_status.json"));
@@ -118,6 +138,14 @@ const event = readJson(path.join(examples, "status_event.json"));
 const telemetry = readJson(path.join(examples, "telemetry_event.json"));
 const errors = readJson(path.join(contracts, "error_codes.json"));
 const signatureVector = readJson(path.join(examples, "signature_vector.json"));
+const clientControlExamples = [
+  "client_register_request.json",
+  "client_register_response.json",
+  "client_projection_response.json",
+  "client_receipt_request.json",
+  "client_receipt_response.json",
+  "client_revoke_response.json"
+].map((file) => readJson(path.join(examples, file)));
 const errorCodes = new Map(errors.codes.map((entry) => [entry.code, entry]));
 assert(errorCodes.size === errors.codes.length, "error registry contains duplicate codes");
 for (const entry of errors.codes) {
@@ -132,9 +160,11 @@ validateSchema("agent_capabilities.schema.json", capabilities);
 validateSchema("status_event.schema.json", event);
 validateSchema("telemetry_event.schema.json", telemetry);
 validateSchema("error_registry.schema.json", errors);
+for (const example of clientControlExamples) validateSchema("client_control.schema.json", example);
 checkProjectionSemantics(projection, signatureVector);
 checkStatusSemantics(status);
 checkEventSemantics(event);
+for (const example of clientControlExamples) checkClientControlSemantics(example);
 assert(errorCodes.has(telemetry.code), `telemetry code is not registered: ${telemetry.code}`);
 assert(errorCodes.get(telemetry.code).owner === telemetry.source, "telemetry source does not own error code");
 assert(errorCodes.get(telemetry.code).severity === telemetry.severity, "telemetry severity disagrees with registry");
@@ -188,5 +218,11 @@ expectReject("duplicate error code", () => {
   const codes = new Set(duplicateErrorRegistry.codes.map((entry) => entry.code));
   assert(codes.size === duplicateErrorRegistry.codes.length, "duplicate error code accepted");
 });
+const mismatchedClientResponse = structuredClone(clientControlExamples[1]);
+mismatchedClientResponse.payload.grant.device_id = "99999999-9999-4999-8999-999999999999";
+expectReject("Client Grant cross-device binding", () => checkClientControlSemantics(mismatchedClientResponse));
+const mismatchedReceipt = structuredClone(clientControlExamples[3]);
+mismatchedReceipt.payload.content_hash = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
+expectReject("Client receipt content binding", () => checkClientControlSemantics(mismatchedReceipt));
 assert(uuid(projection.device_id), "fixture UUID sanity check failed");
 console.log("PASS contracts: JSON Schema, semantic constraints, Agent API, status model, and Ed25519 vector");

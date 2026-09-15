@@ -1,0 +1,14 @@
+{
+  "api_version": 1,
+  "message_type": "register_device_request",
+  "request_id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+  "payload": {
+    "device_id": "44444444-4444-4444-8444-444444444444",
+    "device_key_id": "55555555-5555-4555-8555-555555555555",
+    "platform": "macos",
+    "display_name": "MacBook Pro",
+    "public_key": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "install_id": "install-01HXYZ1234567890",
+    "client_version": "0.1.0"
+  }
+}

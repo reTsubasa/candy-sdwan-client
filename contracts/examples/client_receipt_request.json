@@ -1,0 +1,13 @@
+{
+  "api_version": 1,
+  "message_type": "receipt_request",
+  "request_id": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+  "payload": {
+    "device_id": "44444444-4444-4444-8444-444444444444",
+    "device_key_id": "55555555-5555-4555-8555-555555555555",
+    "projection_id": "11111111-1111-4111-8111-111111111111",
+    "generation": 42,
+    "content_hash": "sha256:8b0b0b3d81cd7cc8934315312d712a7a2d534c91f37a7d48ef8621748b6be393",
+    "state": "committed"
+  }
+}

@@ -19,6 +19,8 @@
 - 数据面：客户端直接连接 Cloud 授权的 SD-WAN Node；
 - 权限执行：客户端调度与 Node/Core 数据面校验双重执行。
 
+M1 当前已冻结终端 Cloud 控制合同：见 [`contracts/client_control.md`](./contracts/client_control.md) 和 [`contracts/client_control.schema.json`](./contracts/client_control.schema.json)。该合同与节点 enrollment、Node Grant、`runtime_configuration_v1` 分离。
+
 ## 目录约定
 
 ```text

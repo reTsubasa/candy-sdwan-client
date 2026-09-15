@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/client-control-v1.schema.json",
+  "title": "SD-WAN Client Cloud Control Contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["api_version", "message_type", "request_id", "payload"],
+  "properties": {
+    "api_version": { "const": 1 },
+    "message_type": {
+      "enum": [
+        "register_device_request",
+        "register_device_response",
+        "projection_response",
+        "receipt_request",
+        "receipt_response",
+        "revoke_response"
+      ]
+    },
+    "request_id": { "$ref": "#/$defs/uuid" },
+    "payload": { "type": "object" }
+  },
+  "allOf": [
+    { "if": { "properties": { "message_type": { "const": "register_device_request" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/register_device_request" } } } },
+    { "if": { "properties": { "message_type": { "const": "register_device_response" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/register_device_response" } } } },
+    { "if": { "properties": { "message_type": { "const": "projection_response" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/projection_response" } } } },
+    { "if": { "properties": { "message_type": { "const": "receipt_request" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/receipt_request" } } } },
+    { "if": { "properties": { "message_type": { "const": "receipt_response" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/receipt_response" } } } },
+    { "if": { "properties": { "message_type": { "const": "revoke_response" } } }, "then": { "properties": { "payload": { "$ref": "#/$defs/revoke_response" } } } }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "base64url": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "minLength": 16, "maxLength": 4096 },
+    "timestamp": { "type": "integer", "minimum": 1 },
+    "register_device_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id", "device_key_id", "platform", "display_name", "public_key", "install_id"],
+      "properties": {
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" },
+        "platform": { "enum": ["windows", "macos", "android"] },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "public_key": { "$ref": "#/$defs/base64url" },
+        "install_id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{8,128}$" },
+        "client_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" }
+      }
+    },
+    "grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["grant_id", "tenant_id", "user_id", "device_id", "device_key_id", "issued_at", "expires_at", "generation", "grant_token", "signing_key_id"],
+      "properties": {
+        "grant_id": { "$ref": "#/$defs/uuid" },
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "user_id": { "$ref": "#/$defs/uuid" },
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" },
+        "issued_at": { "$ref": "#/$defs/timestamp" },
+        "expires_at": { "$ref": "#/$defs/timestamp" },
+        "generation": { "type": "integer", "minimum": 1 },
+        "grant_token": { "$ref": "#/$defs/base64url" },
+        "signing_key_id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$" }
+      }
+    },
+    "register_device_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id", "device_key_id", "status", "grant", "replayed"],
+      "properties": {
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" },
+        "status": { "enum": ["registered", "already_registered", "revoked"] },
+        "grant": { "$ref": "#/$defs/grant" },
+        "replayed": { "type": "boolean" }
+      }
+    },
+    "projection_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id", "device_key_id", "grant_id", "projection", "replayed"],
+      "properties": {
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" },
+        "grant_id": { "$ref": "#/$defs/uuid" },
+        "projection": { "$ref": "policy-projection-v1.schema.json" },
+        "replayed": { "type": "boolean" }
+      }
+    },
+    "receipt_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id", "device_key_id", "projection_id", "generation", "content_hash", "state"],
+      "properties": {
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" },
+        "projection_id": { "$ref": "#/$defs/uuid" },
+        "generation": { "type": "integer", "minimum": 1 },
+        "content_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "state": { "enum": ["received", "verified", "staged", "committed", "rejected"] },
+        "error_code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" }
+      }
+    },
+    "receipt_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted", "state"],
+      "properties": { "accepted": { "const": true }, "state": { "enum": ["received", "verified", "staged", "committed", "rejected"] } }
+    },
+    "revoke_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["device_id", "device_key_id", "revoked", "effective_at"],
+      "properties": {
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" },
+        "revoked": { "const": true },
+        "effective_at": { "$ref": "#/$defs/timestamp" }
+      }
+    }
+  }
+}
