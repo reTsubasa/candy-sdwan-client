@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "event_id": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "boot_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "occurred_at": 1899997002,
+  "source": "client_core",
+  "event_type": "error",
+  "severity": "error",
+  "code": "peer_auth_failed",
+  "retryable": true,
+  "sequence": 7,
+  "dedupe_key": "peer_auth_failed:42",
+  "context": {
+    "agent_version": "0.1.0",
+    "core_version": "0.1.0",
+    "platform": "macos",
+    "phase": "peer_authentication",
+    "generation": 42,
+    "connection_epoch": 3,
+    "network_type": "wifi",
+    "duration_ms": 1000,
+    "retry_count": 2
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/status-event-v1.schema.json",
+  "title": "SD-WAN Client StatusEvent v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "occurred_at", "source", "from", "to", "reason_code", "recoverability"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "event_id": { "$ref": "#/$defs/uuid" },
+    "occurred_at": { "type": "integer", "minimum": 1 },
+    "source": { "enum": ["cloud", "client_core", "platform_agent", "system"] },
+    "from": { "$ref": "#/$defs/state" },
+    "to": { "$ref": "#/$defs/state" },
+    "reason_code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" },
+    "recoverability": { "enum": ["automatic", "user_action", "administrator_action", "permanent"] },
+    "generation": { "type": "integer", "minimum": 1 },
+    "detail": { "type": "string", "maxLength": 256 }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "value"],
+      "properties": {
+        "dimension": { "enum": ["identity", "control_plane", "policy", "node_assignment", "data_plane", "traffic", "display"] },
+        "value": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/policy-projection-v1.schema.json",
+  "title": "SD-WAN Client PolicyProjection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_id",
+    "projection_type",
+    "tenant_id",
+    "user_id",
+    "device_id",
+    "device_key_id",
+    "audience",
+    "grant_id",
+    "grant_expires_at",
+    "generation",
+    "content_hash",
+    "not_before",
+    "stale_until",
+    "issued_at",
+    "traffic_mode",
+    "mode_capabilities",
+    "selected_node",
+    "standby_nodes",
+    "allowed_resources",
+    "dns_projection",
+    "underlay_exclusions",
+    "degraded_behavior",
+    "global_egress",
+    "signing_key_id",
+    "signature"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "projection_id": { "$ref": "#/$defs/uuid" },
+    "projection_type": { "const": "device_client" },
+    "tenant_id": { "$ref": "#/$defs/uuid" },
+    "user_id": { "$ref": "#/$defs/uuid" },
+    "device_id": { "$ref": "#/$defs/uuid" },
+    "device_key_id": { "$ref": "#/$defs/uuid" },
+    "audience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tenant_id", "user_id", "device_id", "device_key_id"],
+      "properties": {
+        "tenant_id": { "$ref": "#/$defs/uuid" },
+        "user_id": { "$ref": "#/$defs/uuid" },
+        "device_id": { "$ref": "#/$defs/uuid" },
+        "device_key_id": { "$ref": "#/$defs/uuid" }
+      }
+    },
+    "grant_id": { "$ref": "#/$defs/uuid" },
+    "grant_expires_at": { "$ref": "#/$defs/epoch" },
+    "generation": { "type": "integer", "minimum": 1 },
+    "content_hash": { "$ref": "#/$defs/content_hash" },
+    "not_before": { "$ref": "#/$defs/epoch" },
+    "stale_until": { "$ref": "#/$defs/epoch" },
+    "issued_at": { "$ref": "#/$defs/epoch" },
+    "traffic_mode": { "enum": ["policy", "global"] },
+    "mode_capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["policy", "global"] }
+    },
+    "selected_node": { "$ref": "#/$defs/node_assignment" },
+    "standby_nodes": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/node_assignment" }
+    },
+    "allowed_resources": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": { "$ref": "#/$defs/resource" }
+    },
+    "dns_projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "servers", "leak_protection"],
+      "properties": {
+        "mode": { "enum": ["cloud_split", "cloud_global", "system", "disabled"] },
+        "servers": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+        },
+        "search_domains": {
+          "type": "array",
+          "maxItems": 32,
+          "items": { "type": "string", "minLength": 1, "maxLength": 253 }
+        },
+        "leak_protection": { "type": "boolean" }
+      }
+    },
+    "underlay_exclusions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+    },
+    "degraded_behavior": {
+      "enum": ["protected_fail_closed", "protected_fail_closed_direct_nonprotected", "stop_all"]
+    },
+    "global_egress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "node_id", "dns_egress"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "node_id": { "$ref": "#/$defs/uuid" },
+        "dns_egress": { "enum": ["selected_node", "cloud_resolver", "none"] }
+      }
+    },
+    "signing_key_id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$" },
+    "signature": { "$ref": "#/$defs/base64" }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["traffic_mode"], "properties": { "traffic_mode": { "const": "global" } } },
+      "then": {
+        "properties": {
+          "mode_capabilities": { "type": "array", "contains": { "const": "global" } },
+          "global_egress": {
+            "type": "object",
+            "properties": {
+              "enabled": { "const": true },
+              "dns_egress": { "enum": ["selected_node", "cloud_resolver"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "required": ["traffic_mode"], "properties": { "traffic_mode": { "const": "policy" } } },
+      "then": {
+        "properties": {
+          "mode_capabilities": { "type": "array", "contains": { "const": "policy" } },
+          "global_egress": {
+            "type": "object",
+            "properties": {
+              "enabled": { "const": false },
+              "dns_egress": { "const": "none" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "epoch": { "type": "integer", "minimum": 1 },
+    "content_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "base64": { "type": "string", "pattern": "^[A-Za-z0-9+/]+={0,2}$", "minLength": 16, "maxLength": 4096 },
+    "node_assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "endpoint", "priority", "node_key_id", "transport", "assignment_lease_until"],
+      "properties": {
+        "node_id": { "$ref": "#/$defs/uuid" },
+        "endpoint": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "priority": { "type": "integer", "minimum": 1, "maximum": 255 },
+        "node_key_id": { "$ref": "#/$defs/uuid" },
+        "transport": { "enum": ["quic", "tls_tcp"] },
+        "assignment_lease_until": { "$ref": "#/$defs/epoch" }
+      }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "domains", "cidrs", "ports"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,128}$" },
+        "domains": {
+          "type": "array",
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 253 }
+        },
+        "cidrs": {
+          "type": "array",
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+        },
+        "ports": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        }
+      },
+      "anyOf": [
+        { "properties": { "domains": { "type": "array", "minItems": 1 } } },
+        { "properties": { "cidrs": { "type": "array", "minItems": 1 } } }
+      ]
+    }
+  }
+}

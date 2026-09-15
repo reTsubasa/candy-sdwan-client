@@ -1,0 +1,7 @@
+{
+  "api_version": 1,
+  "request_id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "method": "request_traffic_mode",
+  "ok": true,
+  "payload": { "accepted": true, "requested_mode": "policy" }
+}

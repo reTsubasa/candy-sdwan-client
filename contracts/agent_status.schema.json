@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/agent-status-v1.schema.json",
+  "title": "SD-WAN Client AgentStatus v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "reported_at",
+    "boot_id",
+    "agent_version",
+    "core_version",
+    "identity",
+    "control_plane",
+    "policy",
+    "node_assignment",
+    "data_plane",
+    "traffic",
+    "health",
+    "display",
+    "last_transition"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "reported_at": { "type": "integer", "minimum": 1 },
+    "boot_id": { "$ref": "#/$defs/uuid" },
+    "agent_version": { "$ref": "#/$defs/version" },
+    "core_version": { "$ref": "#/$defs/version" },
+    "identity": { "enum": ["unregistered", "authenticating", "authenticated", "expired", "revoked", "error"] },
+    "control_plane": { "enum": ["offline", "connecting", "online", "stale", "revoked"] },
+    "policy": { "enum": ["none", "syncing", "staged", "active", "rejected", "expired"] },
+    "node_assignment": { "enum": ["none", "assigned", "lease_expired", "degraded"] },
+    "data_plane": { "enum": ["stopped", "preparing", "connecting", "connected", "draining", "degraded", "failed"] },
+    "traffic": { "enum": ["idle", "active", "blocked", "fail_open", "degraded"] },
+    "health": { "enum": ["healthy", "degraded", "failed", "unknown"] },
+    "display": { "enum": ["disconnected", "connecting", "connected", "degraded", "action_required", "unavailable"] },
+    "traffic_mode": { "enum": ["policy", "global"] },
+    "active_projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projection_id", "generation", "content_hash"],
+      "properties": {
+        "projection_id": { "$ref": "#/$defs/uuid" },
+        "generation": { "type": "integer", "minimum": 1 },
+        "content_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "phase": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+    "last_error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "retryable", "occurred_at", "user_action"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" },
+        "retryable": { "type": "boolean" },
+        "occurred_at": { "type": "integer", "minimum": 1 },
+        "user_action": { "enum": ["none", "login_again", "wait_and_retry", "wait_for_policy", "retry_connection", "grant_permission", "contact_admin", "upgrade_client"] },
+        "detail": { "type": "string", "maxLength": 256 }
+      }
+    },
+    "last_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "from", "to", "reason_code", "occurred_at", "source", "recoverability"],
+      "properties": {
+        "dimension": { "enum": ["identity", "control_plane", "policy", "node_assignment", "data_plane", "traffic", "display"] },
+        "from": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+        "to": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+        "reason_code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" },
+        "occurred_at": { "type": "integer", "minimum": 1 },
+        "source": { "enum": ["cloud", "client_core", "platform_agent", "system"] },
+        "recoverability": { "enum": ["automatic", "user_action", "administrator_action", "permanent"] }
+      }
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rx_bytes": { "type": "integer", "minimum": 0 },
+        "tx_bytes": { "type": "integer", "minimum": 0 },
+        "reconnects": { "type": "integer", "minimum": 0 },
+        "policy_rejections": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["data_plane"], "properties": { "data_plane": { "const": "connected" } } },
+      "then": {
+        "properties": {
+          "identity": { "const": "authenticated" },
+          "control_plane": { "enum": ["online", "stale"] },
+          "policy": { "const": "active" },
+          "node_assignment": { "const": "assigned" },
+          "health": { "enum": ["healthy", "degraded"] },
+          "display": { "enum": ["connected", "degraded"] }
+        }
+      }
+    },
+    {
+      "if": { "required": ["display"], "properties": { "display": { "const": "connected" } } },
+      "then": {
+        "properties": {
+          "identity": { "const": "authenticated" },
+          "policy": { "const": "active" },
+          "data_plane": { "const": "connected" },
+          "health": { "enum": ["healthy", "degraded"] }
+        }
+      }
+    },
+    {
+      "if": { "required": ["identity"], "properties": { "identity": { "enum": ["unregistered", "authenticating", "expired", "revoked", "error"] } } },
+      "then": {
+        "properties": {
+          "data_plane": { "not": { "const": "connected" } },
+          "display": { "not": { "const": "connected" } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" }
+  }
+}

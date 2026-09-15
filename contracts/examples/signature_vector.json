@@ -1,0 +1,10 @@
+{
+  "algorithm": "Ed25519",
+  "canonicalization": "RFC8785-JCS",
+  "domain": "candy/sdwan/policy-projection/v1",
+  "signing_key_id": "cloud-policy-2026-01",
+  "public_key_base64": "11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=",
+  "content_hash": "sha256:8b0b0b3d81cd7cc8934315312d712a7a2d534c91f37a7d48ef8621748b6be393",
+  "signature_base64": "og2GE5Y3FJmvMQJ4FOlbeECR7Ckkp+TGXizbung6SB43TlHaCq0IEE3F0m13CfaPNqGNHNNAAcmzrFtAFQJRAA==",
+  "test_vector": "RFC 8032 Ed25519 test key 1"
+}

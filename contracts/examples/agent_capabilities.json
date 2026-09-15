@@ -1,0 +1,7 @@
+{
+  "api_version": 1,
+  "agent_version": "0.1.0",
+  "platform": "macos",
+  "methods": ["get_status", "connect", "disconnect", "request_traffic_mode", "subscribe_status", "get_capabilities", "cancel"],
+  "features": { "policy_mode": true, "global_mode": false, "status_stream": true, "error_telemetry": true }
+}

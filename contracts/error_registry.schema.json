@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/error-registry-v1.schema.json",
+  "title": "SD-WAN Client Error Registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "codes"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "codes": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["code", "owner", "severity", "retryable", "user_action", "telemetry_level"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" },
+          "owner": { "enum": ["cloud", "client_core", "platform_agent", "telemetry"] },
+          "severity": { "enum": ["info", "warning", "error", "critical"] },
+          "retryable": { "type": "boolean" },
+          "user_action": { "enum": ["none", "login_again", "wait_and_retry", "wait_for_policy", "retry_connection", "grant_permission", "contact_admin", "upgrade_client"] },
+          "telemetry_level": { "enum": ["normal", "immediate"] }
+        }
+      }
+    }
+  }
+}

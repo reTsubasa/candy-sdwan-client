@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "event_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "occurred_at": 1899997001,
+  "source": "client_core",
+  "from": { "dimension": "data_plane", "value": "connecting" },
+  "to": { "dimension": "data_plane", "value": "connected" },
+  "reason_code": "peer_authenticated",
+  "recoverability": "automatic",
+  "generation": 42
+}

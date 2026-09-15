@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/telemetry-event-v1.schema.json",
+  "title": "SD-WAN Client TelemetryEvent v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_id", "boot_id", "occurred_at", "source", "event_type", "severity", "code", "retryable", "sequence", "dedupe_key", "context"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "event_id": { "$ref": "#/$defs/uuid" },
+    "boot_id": { "$ref": "#/$defs/uuid" },
+    "occurred_at": { "type": "integer", "minimum": 1 },
+    "source": { "enum": ["client_core", "platform_agent"] },
+    "event_type": { "const": "error" },
+    "severity": { "enum": ["warning", "error", "critical"] },
+    "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" },
+    "retryable": { "type": "boolean" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "dedupe_key": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_.:-]{2,127}$" },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agent_version": { "$ref": "#/$defs/version" },
+        "core_version": { "$ref": "#/$defs/version" },
+        "platform": { "enum": ["windows", "macos", "android"] },
+        "phase": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+        "projection_id": { "$ref": "#/$defs/uuid" },
+        "generation": { "type": "integer", "minimum": 1 },
+        "connection_epoch": { "type": "integer", "minimum": 1 },
+        "network_type": { "enum": ["wifi", "cellular", "ethernet", "unknown"] },
+        "duration_ms": { "type": "integer", "minimum": 0, "maximum": 86400000 },
+        "retry_count": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" }
+  }
+}

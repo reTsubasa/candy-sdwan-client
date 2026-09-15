@@ -1,0 +1,18 @@
+{
+  "name": "sdwan-client-contracts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate_contracts.mjs",
+    "test": "node --test scripts/tests/*.test.mjs",
+    "check:m0": "./scripts/check-m0.sh",
+    "dev:env": "node scripts/dev_env.mjs",
+    "audit": "npm audit --audit-level=high",
+    "check:key-isolation": "node scripts/check_test_key_isolation.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "canonicalize": "^2.1.0"
+  },
+  "devDependencies": {}
+}

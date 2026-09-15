@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "codes": [
+    { "code": "auth_invalid_credentials", "owner": "cloud", "severity": "warning", "retryable": false, "user_action": "login_again", "telemetry_level": "normal" },
+    { "code": "auth_session_expired", "owner": "cloud", "severity": "warning", "retryable": false, "user_action": "login_again", "telemetry_level": "normal" },
+    { "code": "auth_device_revoked", "owner": "cloud", "severity": "error", "retryable": false, "user_action": "contact_admin", "telemetry_level": "immediate" },
+    { "code": "auth_rate_limited", "owner": "cloud", "severity": "warning", "retryable": true, "user_action": "wait_and_retry", "telemetry_level": "normal" },
+    { "code": "device_registration_rejected", "owner": "cloud", "severity": "error", "retryable": false, "user_action": "contact_admin", "telemetry_level": "immediate" },
+    { "code": "grant_expired", "owner": "cloud", "severity": "error", "retryable": true, "user_action": "wait_for_policy", "telemetry_level": "immediate" },
+    { "code": "projection_signature_invalid", "owner": "client_core", "severity": "error", "retryable": false, "user_action": "contact_admin", "telemetry_level": "immediate" },
+    { "code": "projection_audience_mismatch", "owner": "client_core", "severity": "error", "retryable": false, "user_action": "contact_admin", "telemetry_level": "immediate" },
+    { "code": "projection_stale_generation", "owner": "client_core", "severity": "warning", "retryable": true, "user_action": "wait_for_policy", "telemetry_level": "normal" },
+    { "code": "projection_expired", "owner": "client_core", "severity": "error", "retryable": true, "user_action": "wait_for_policy", "telemetry_level": "immediate" },
+    { "code": "projection_schema_unsupported", "owner": "client_core", "severity": "error", "retryable": false, "user_action": "upgrade_client", "telemetry_level": "immediate" },
+    { "code": "node_assignment_lease_expired", "owner": "client_core", "severity": "warning", "retryable": true, "user_action": "wait_for_policy", "telemetry_level": "normal" },
+    { "code": "peer_auth_failed", "owner": "client_core", "severity": "error", "retryable": true, "user_action": "retry_connection", "telemetry_level": "immediate" },
+    { "code": "peer_unavailable", "owner": "client_core", "severity": "warning", "retryable": true, "user_action": "retry_connection", "telemetry_level": "normal" },
+    { "code": "all_authorized_nodes_unavailable", "owner": "client_core", "severity": "error", "retryable": true, "user_action": "wait_and_retry", "telemetry_level": "immediate" },
+    { "code": "tun_permission_required", "owner": "platform_agent", "severity": "error", "retryable": false, "user_action": "grant_permission", "telemetry_level": "normal" },
+    { "code": "tun_create_failed", "owner": "platform_agent", "severity": "error", "retryable": true, "user_action": "retry_connection", "telemetry_level": "immediate" },
+    { "code": "route_commit_failed", "owner": "platform_agent", "severity": "error", "retryable": true, "user_action": "retry_connection", "telemetry_level": "immediate" },
+    { "code": "control_plane_unreachable", "owner": "platform_agent", "severity": "warning", "retryable": true, "user_action": "wait_and_retry", "telemetry_level": "normal" },
+    { "code": "control_plane_recursion_detected", "owner": "platform_agent", "severity": "error", "retryable": false, "user_action": "contact_admin", "telemetry_level": "immediate" },
+    { "code": "core_process_crashed", "owner": "platform_agent", "severity": "error", "retryable": true, "user_action": "retry_connection", "telemetry_level": "immediate" },
+    { "code": "version_incompatible", "owner": "platform_agent", "severity": "error", "retryable": false, "user_action": "upgrade_client", "telemetry_level": "immediate" },
+    { "code": "telemetry_rate_limited", "owner": "telemetry", "severity": "warning", "retryable": true, "user_action": "none", "telemetry_level": "normal" },
+    { "code": "request_too_large", "owner": "platform_agent", "severity": "warning", "retryable": false, "user_action": "none", "telemetry_level": "normal" },
+    { "code": "request_timeout", "owner": "platform_agent", "severity": "warning", "retryable": true, "user_action": "retry_connection", "telemetry_level": "normal" },
+    { "code": "request_in_progress", "owner": "platform_agent", "severity": "info", "retryable": true, "user_action": "wait_and_retry", "telemetry_level": "normal" }
+  ]
+}

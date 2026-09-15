@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/agent-request-v1.schema.json",
+  "title": "SD-WAN Client AgentRequest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["api_version", "request_id", "method", "payload"],
+  "properties": {
+    "api_version": { "const": 1 },
+    "request_id": { "$ref": "#/$defs/uuid" },
+    "method": {
+      "enum": [
+        "get_status",
+        "connect",
+        "disconnect",
+        "request_traffic_mode",
+        "get_identity",
+        "get_policy_status",
+        "get_diagnostics",
+        "logout",
+        "subscribe_status",
+        "get_capabilities",
+        "cancel"
+      ]
+    },
+    "payload": { "type": "object", "additionalProperties": true }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["method"], "properties": { "method": { "const": "request_traffic_mode" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["mode"],
+            "properties": { "mode": { "enum": ["policy", "global"] } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "required": ["method"], "properties": { "method": { "const": "get_diagnostics" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope"],
+            "properties": { "scope": { "enum": ["summary", "connection", "policy"] } }
+          }
+        }
+      }
+    },
+    {
+      "if": { "required": ["method"], "properties": { "method": { "enum": ["get_status", "connect", "disconnect", "get_identity", "get_policy_status", "logout", "subscribe_status", "get_capabilities"] } } },
+      "then": {
+        "properties": {
+          "payload": { "type": "object", "maxProperties": 0 }
+        }
+      }
+    },
+    {
+      "if": { "required": ["method"], "properties": { "method": { "const": "cancel" } } },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["target_request_id"],
+            "properties": { "target_request_id": { "$ref": "#/$defs/uuid" } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    }
+  }
+}

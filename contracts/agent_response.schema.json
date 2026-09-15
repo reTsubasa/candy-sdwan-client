@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://candy.example/sdwan-client/contracts/agent-response-v1.schema.json",
+  "title": "SD-WAN Client AgentResponse v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["api_version", "request_id", "method", "ok"],
+  "properties": {
+    "api_version": { "const": 1 },
+    "request_id": { "$ref": "#/$defs/uuid" },
+    "method": {
+      "enum": ["get_status", "connect", "disconnect", "request_traffic_mode", "get_identity", "get_policy_status", "get_diagnostics", "logout", "subscribe_status", "get_capabilities", "cancel"]
+    },
+    "ok": { "type": "boolean" },
+    "payload": { "type": "object" },
+    "error": { "$ref": "#/$defs/error" }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "get_status" } } },
+      "then": { "properties": { "payload": { "$ref": "https://candy.example/sdwan-client/contracts/agent-status-v1.schema.json" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "enum": ["connect", "disconnect", "logout"] } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/command_ack" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "request_traffic_mode" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/mode_ack" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "get_identity" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/identity" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "get_policy_status" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/policy_status" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "get_diagnostics" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/diagnostics" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "subscribe_status" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/subscription" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "get_capabilities" } } },
+      "then": { "properties": { "payload": { "$ref": "https://candy.example/sdwan-client/contracts/agent-capabilities-v1.schema.json" } } }
+    },
+    {
+      "if": { "required": ["ok", "method"], "properties": { "ok": { "const": true }, "method": { "const": "cancel" } } },
+      "then": { "properties": { "payload": { "$ref": "#/$defs/command_ack" } } }
+    }
+  ],
+  "oneOf": [
+    { "required": ["payload"], "not": { "required": ["error"], "properties": { "error": {} } }, "properties": { "ok": { "const": true }, "payload": {}, "error": {} } },
+    { "required": ["error"], "not": { "required": ["payload"], "properties": { "payload": {} } }, "properties": { "ok": { "const": false }, "payload": {}, "error": {} } }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "retryable", "user_action"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]{2,79}$" },
+        "retryable": { "type": "boolean" },
+        "user_action": { "enum": ["none", "login_again", "wait_and_retry", "wait_for_policy", "retry_connection", "grant_permission", "contact_admin", "upgrade_client"] },
+        "detail": { "type": "string", "maxLength": 256 }
+      }
+    },
+    "command_ack": {
+      "type": "object", "additionalProperties": false,
+      "required": ["accepted"], "properties": { "accepted": { "const": true } }
+    },
+    "mode_ack": {
+      "type": "object", "additionalProperties": false,
+      "required": ["accepted", "requested_mode"],
+      "properties": { "accepted": { "const": true }, "requested_mode": { "enum": ["policy", "global"] } }
+    },
+    "identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["tenant_id", "user_id", "device_id", "username", "auth_source", "device_status"],
+      "properties": {
+        "tenant_id": { "$ref": "#/$defs/uuid" }, "user_id": { "$ref": "#/$defs/uuid" }, "device_id": { "$ref": "#/$defs/uuid" },
+        "username": { "type": "string", "minLength": 1, "maxLength": 254 },
+        "auth_source": { "enum": ["password", "oidc", "saml", "enterprise"] },
+        "device_status": { "enum": ["registered", "revoked", "registration_required"] }
+      }
+    },
+    "policy_status": {
+      "type": "object", "additionalProperties": false,
+      "required": ["state", "updated_at"],
+      "properties": {
+        "state": { "enum": ["none", "syncing", "staged", "active", "rejected", "expired"] },
+        "projection_id": { "$ref": "#/$defs/uuid" }, "generation": { "type": "integer", "minimum": 1 },
+        "content_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }, "updated_at": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "diagnostics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scope", "items"],
+      "properties": { "scope": { "enum": ["summary", "connection", "policy"] }, "items": { "type": "array", "maxItems": 128, "items": { "type": "string", "maxLength": 256 } } }
+    },
+    "subscription": {
+      "type": "object", "additionalProperties": false,
+      "required": ["subscription_id", "heartbeat_seconds"],
+      "properties": { "subscription_id": { "$ref": "#/$defs/uuid" }, "heartbeat_seconds": { "type": "integer", "minimum": 5, "maximum": 300 } }
+    }
+  }
+}
