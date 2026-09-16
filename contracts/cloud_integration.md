@@ -37,6 +37,14 @@ Human Session
 
 当前已完成策略管理侧的发布、设备绑定和有效策略读取；这些接口不等价于终端客户端注册接口，终端客户端仍不能直接调用节点 enrollment 或站点 runtime 接口。
 
+Cloud 数据层目前还提供终端授权快照和候选节点选路的内部能力：快照按同一
+`organization_id/tenant_id/user_id/client_device_id` 读取 active 用户、终端设备、active
+设备公钥、策略 generation/content hash 和完整资源集合；候选节点只来自租户下 active 且
+具备有效 `private.tun.connect` entitlement 和 active `CANDY_QUIC_UDP` endpoint 的节点。
+Cloud 会稳定地产生 1 个主节点和最多 2 个备用节点，并按偏好区域、区域名、节点 ID、
+endpoint ID 排序。当前这些能力尚未暴露为终端 HTTP 接口，也不代表客户端可以先行连接；
+在 Client Grant 和 Projection 合同完成前，客户端必须保持未连接状态。
+
 这条流程必须明确：
 
 - 用户会话只负责调用 Cloud API，不直接作为 SD-WAN Peer 凭据；
