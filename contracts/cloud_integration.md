@@ -14,6 +14,9 @@
 | 设备证书续期 | `/auth/v1/device-certificates/renew` | 仅在终端设备采用同一 Device CA 模型后复用 |
 | Grant | `/auth/v1/access-grants` | 复用 Grant 的签名和验证模型，不直接复用 Node Pool 语义 |
 | Runtime 同步 | `/auth/v1/runtime/*` | 当前是 Site/Segment Runtime 合同，不直接作为终端 Projection |
+| 终端访问策略发布 | `/v1/tenants/{tenant_id}/client-access-policies` | 仅供已认证 Cloud 管理面发布 tenant 级终端资源和模式权限 |
+| 终端策略设备绑定 | `/v1/tenants/{tenant_id}/client-access-policy-bindings` | 仅供已认证 Cloud 管理面把策略绑定到具体终端设备 |
+| 终端策略读取 | `/v1/tenants/{tenant_id}/client-users/{user_id}/client-devices/{client_device_id}/access-policy` | 管理面读取有效绑定；终端专用读取/注册接口仍待完成 |
 
 当前 Cloud 已实现用户名密码的安全基础：密码哈希、短期 Access Token、轮换 Refresh Token、撤销和会话检查。当前登录字段是 `email`，因此 Client v1 的“用户名”在协议层映射为 Cloud email；如果产品必须支持非 email 用户名，应新增独立的唯一 `username` 字段和迁移任务，不能让客户端私自改变请求字段。
 
@@ -31,6 +34,8 @@ Human Session
   -> Cloud 计算主节点、备用节点和 PolicyProjection
   -> Client 验证并执行 Projection
 ```
+
+当前已完成策略管理侧的发布、设备绑定和有效策略读取；这些接口不等价于终端客户端注册接口，终端客户端仍不能直接调用节点 enrollment 或站点 runtime 接口。
 
 这条流程必须明确：
 
