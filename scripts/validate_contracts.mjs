@@ -111,9 +111,14 @@ function checkEventSemantics(event) {
 function checkClientControlSemantics(message) {
   const payload = message.payload;
   if (message.message_type === "register_device_response") {
-    assert(payload.grant.device_id === payload.device_id, "Client Grant device binding mismatch");
-    assert(payload.grant.device_key_id === payload.device_key_id, "Client Grant key binding mismatch");
-    assert(payload.grant.expires_at > payload.grant.issued_at, "Client Grant expiry must follow issue time");
+    if (payload.status === "revoked") {
+      assert(payload.grant === null, "revoked device must not carry a Grant");
+    }
+    if (payload.grant !== null) {
+      assert(payload.grant.device_id === payload.device_id, "Client Grant device binding mismatch");
+      assert(payload.grant.device_key_id === payload.device_key_id, "Client Grant key binding mismatch");
+      assert(payload.grant.expires_at > payload.grant.issued_at, "Client Grant expiry must follow issue time");
+    }
   }
   if (message.message_type === "projection_response") {
     assert(payload.projection.device_id === payload.device_id, "Projection response device binding mismatch");

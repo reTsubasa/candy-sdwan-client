@@ -74,7 +74,10 @@
         "device_id": { "$ref": "#/$defs/uuid" },
         "device_key_id": { "$ref": "#/$defs/uuid" },
         "status": { "enum": ["registered", "already_registered", "revoked"] },
-        "grant": { "$ref": "#/$defs/grant" },
+        "grant": {
+          "description": "Null until an active Client Access Policy is bound to the device; the device then obtains its Grant from POST /v1/client/devices/{device_id}/grant.",
+          "oneOf": [{ "$ref": "#/$defs/grant" }, { "type": "null" }]
+        },
         "replayed": { "type": "boolean" }
       }
     },

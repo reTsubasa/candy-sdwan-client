@@ -16,6 +16,22 @@ must never be used to switch tenant or user context.
 | `POST` | `/v1/client/devices/{device_id}/heartbeat` | Refresh liveness and request revocation state | `request_id` |
 | `POST` | `/v1/client/devices/{device_id}/revoke` | Revoke device key and active Client Grant | `request_id` |
 
+## Registration and Grant sequencing
+
+A device row must exist before a policy can be bound to it, so registration and
+Grant issuance are separate steps:
+
+1. `POST /v1/client/devices` registers the public key and reports
+   `status = registered` with `grant = null` when no active policy is bound yet.
+2. The management plane binds an active Client Access Policy to the device.
+3. `POST /v1/client/devices/{device_id}/grant` issues (or replays) the signed
+   Client Grant, and subsequent registration replays return that same Grant.
+
+`grant` is `null` **only** for a device with no bound policy. A `revoked` device
+always reports `grant = null`. A client that receives `grant = null` stays
+disconnected and must not open any data-plane session; it may retry with backoff
+while the UI reports `wait_for_policy`.
+
 ## Trust and binding rules
 
 - The session subject owns the device. A request naming another tenant or user is rejected.
